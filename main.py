@@ -1,9 +1,9 @@
 from fastapi import  FastAPI , HTTPException
 import uvicorn
-import pydantic
 from caeser.Caesar import Caesar
 from caeser.encript_caesar import encript_caeser
 from fence.Fence import Fence
+from fence.encrption import *
 
 
 
@@ -17,46 +17,52 @@ def root():
 
     return "Hello"
 
+
 @app.get("/test")
 def root():
 
     return {"msg":"hi from test"}
 
+
 @app.get("/test/{name}")
 def root(name):
 
     with open("names.txt","a") as f:
-        f.writelines(name)
+        f.writelines(f"{name} \n")
 
-    return name
+    return {"msg":"saved user"}
 
-@app.post("/caesar/")
+
+@app.post("/caesar")
 def caesar_post(caesar:Caesar):
+    print("in f")
     text = encript_caeser(caesar.text,caesar.offset)
 
     if caesar.mode == "encrypt":
-        return { "encrypted_text": text }
+        text = encript_caeser(caesar.text, caesar.offset)
+        return {"encrypted_text": text}
 
     elif caesar.mode == "decrypt":
+        text = encript_caeser(caesar.text, caesar.offset * -1)
         return {"decrypted_text": text}
 
     else:
         raise HTTPException(status_code=400, detail="We can only 'encrypt' and 'decrypt'")
 
 
-@app.get("/fence/encrypt/{text}")
+@app.get("/fence/encrypt")
 def fence_encrypt(text:str):
 
+    text = encription_fence(text)
+
     return { "encrypted_text": text }
-
-
-
 
 
 @app.post("/fence/decrypt")
 def fence_decrypt(fence:Fence):
 
-    return {"decrypted": "..."}
+    text = decrypt_fence(fence.text)
+    return {"decrypted": text}
 
 
 
